@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SDN Firewall Controller</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/switch.css">
+  </head>
+  
+  <style>
+    body{ 
+      padding:1em 10em;
+      font-family:"微软雅黑";
+    }
+    .top{
+      font-size: 2em;
+      padding:2em 0;
+    }
+    #top-l{
+      width:20%;
+      text-align:center;
+      float: left;
+    }
+    #top-r{
+      float: left;
+      width:80%;
+    }
+    .navi{
+      width:20%;
+      font-size:1.2em;
+      text-align:right;
+      float: left;
+    }
+    .panel{
+      width:80%;
+      display: none;
+      float: left;
+      padding: 0 3em;
+    }
+    .mytext{
+      padding:0.2em 2em;
+      font-size: 1.2em;
+    }
+    .mytitle{
+      font-size: 1.2em;
+      font-weight: bold;
+      padding:2em 0;
+    }
+  </style>
+
+  <body>
+
+    <!--顶栏-->
+    <div class="top">
+      <span class="glyphicon glyphicon-tower" id="top-l"></span> 
+      <p id="top-r">SDN Firewall Controller System v1.0</p>
+    </div>
+    <hr />
+
+    <!--导航-->
+    <div class="navi">
+      <ul class="nav nav-pills nav-stacked">
+        <li id="li1" onclick="showpanel(1)"><a href="#">当前状态</a></li>
+        <li id="li2" onclick="showpanel(2)"><a href="#">添加规则</a></li>
+        <li id="li3" onclick="showpanel(3)"><a href="#">关于</a></li>
+      </ul>
+    </div>
+
+    <!--当前状态-->
+    <div class="panel" id="panel1">
+      <p class="mytitle" style="color:darkgreen">防火墙开关</p>
+      <input id="switch" type="checkbox" checked />
+      <p class="mytitle" style="color:darkblue">防火墙规则</p>
+      <table class="table table-hover">
+  		<thead>
+    		<tr>
+      			<th>规则编号</th>
+      			<th>源地址</th>
+      			<th>源前缀</th>
+      			<th>源端口</th>
+      			<th>目的地址</th>
+      			<th>目的前缀</th>
+      			<th>目的端口</th>
+      			<th>协议类型</th>
+                <th>操作类型</th>
+                <th>优先级</th>
+    		</tr>
+  		</thead>
+  		<tbody id="rule_table"></tbody>
+	  </table>
+	  <p class="mytitle" style="color:darkred">删除规则</p>
+	  <form class="form-horizontal " role="form">
+	  	<div class="form-group">
+			<label for="firstname" class="col-sm-2 control-label">规则编号</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="delete_input" placeholder="Num">
+			</div>
+			<div class="col-sm-2">
+				<button type="submit" class="btn btn-danger" onclick="rule_delete()">删除</button>
+			</div>
+	  	</div>
+	  </form>
+    </div>
+
+    <!--添加规则-->
+    <div class="panel" id="panel2">
+      <p class="mytitle" style="color:darkgreen">添加一条新规则</p>
+      <form class="form-horizontal " role="form">
+      	<div class="form-group">
+			<label for="lastname" class="col-sm-2 control-label">规则类型</label>
+			<div class="col-sm-3">
+				<select class="input-large form-control" id="input0">
+  					<option value="">选择规则类型</option>
+  					<option value="P2P">点对点</option>
+                    <option value="P2S">点对子网</option>
+  					<option value="S2S">子网对子网</option>
+                    <option value="PRO">基于协议</option>
+  					<option value="PORT">基于端口</option>
+				</select>
+			</div>
+            <label for="lastname" class="col-sm-1 control-label">操作</label>
+			<div class="col-sm-2">
+				<select class="input-large form-control" id="input8">
+  					<option value="">选择操作类型</option>
+  					<option value="n">禁止通信</option>
+  					<option value="y">允许通信</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="firstname" class="col-sm-2 control-label">源地址</label>
+			<div class="col-sm-3">
+				<input type="text" class="form-control" id="input1" placeholder="Source IP address">
+			</div>
+			<label for="firstname" class="col-sm-1 control-label">前缀</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="input2" placeholder="Prefix Length">
+			</div>
+			<label for="firstname" class="col-sm-1 control-label">端口</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="input3" placeholder="Source Port">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="firstname" class="col-sm-2 control-label">目的地址</label>
+			<div class="col-sm-3">
+				<input type="text" class="form-control" id="input4" placeholder="Source IP address">
+			</div>
+			<label for="firstname" class="col-sm-1 control-label">前缀</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="input5" placeholder="Prefix Length">
+			</div>
+			<label for="firstname" class="col-sm-1 control-label">端口</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="input6" placeholder="Source Port">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="lastname" class="col-sm-2 control-label">协议类型</label>
+			<div class="col-sm-3">
+				<select class="input-large form-control" id="input7">
+  					<option value="">选择协议类型</option>
+  					<option value="TCP">TCP</option>
+  					<option value="UDP">UDP</option>
+  					<option value="ICMP">ICMP</option>
+				</select>
+			</div>
+            <label for="firstname" class="col-sm-1 control-label">优先级</label>
+			<div class="col-sm-2">
+				<input type="text" class="form-control" id="input9" value="0">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-2" style="margin-top:2em">
+				<button type="submit" class="btn btn-success" onclick="rule_append()">提交</button>
+			</div>
+		</div>
+	  </form>
+    </div>
+
+    <!--关于-->
+    <div class="panel" id="panel3">
+      <span class="glyphicon glyphicon-fire" style="padding:2em 0;color:darkred"></span>
+      <p class="mytext">SDN防火墙控制系统</p>
+      <p class="mytext">系统版本 1.0</p>
+      <hr />
+      <span class="glyphicon glyphicon-user" style="padding:2em 0;color:darkblue"></span>
+      <p class="mytext">新型计算机网络作业小组</p>
+      <p class="mytext">Copyright © 2016</p>
+      <hr />
+      <span class="glyphicon glyphicon-envelope" style="padding:2em 0;color:orange"></span>
+      <p class="mytext">wangyue16@act.buaa.edu.cn</p>
+      <hr />
+    </div>
+    
+    <script src="../static/js/jq.js"></script>
+    <script src="../static/js/style.js"></script>
+    <script src="../static/js/switch.js"></script>
+    <script>
+
+    	$("#switch").bootstrapSwitch({    
+        	onColor:"success",    
+        	size:"large",  
+        	onSwitchChange:function(event,state){
+            	if(state==true){
+            	    $(this).val("1");
+            	    $.getJSON("control/switch_on",function(){});
+            	}else{
+            	    $(this).val("2");
+            	    $.getJSON("control/switch_off",function(){});
+            	}  
+        	}  
+    	});
+      	showpanel(1);
+
+        function rule_append(){
+            var url = "control/rule_append?";
+            for (var i=0;i < 10;i++){
+                var input = $('#input'+i).val();
+                url += "input"+i+"="+input+"&";
+                if (i < 9) $('#input'+i).val("");
+            }
+            $.getJSON(url,function(data){
+                console.log(data);
+                if (data.error)
+                    alert("规则添加失败，请检验格式！");
+                else
+                    alert("新规则添加成功！");
+            });
+            showpanel(2);
+        }
+
+        function rule_status(){
+            $.getJSON("control/rule_status",function(data){
+                var table = $('#rule_table');
+                var rules = "";
+                $('.rule').remove();
+                data.forEach(function(rule){
+                    var rule_add = "";
+                    rule_add += "<td>"+rule.ruleid+"</td>";
+                    rule_add += "<td>"+rule.nw_src_prefix+"</td>";
+                    rule_add += "<td>"+rule.nw_src_maskbits+"</td>";
+                    rule_add += "<td>"+rule.tp_src+"</td>";
+                    rule_add += "<td>"+rule.nw_dst_prefix+"</td>";
+                    rule_add += "<td>"+rule.nw_dst_maskbits+"</td>";
+                    rule_add += "<td>"+rule.tp_dst+"</td>";
+                    rule_add += "<td>"+rule.nw_proto+"</td>";
+                    rule_add += "<td>"+rule.action+"</td>";
+                    rule_add += "<td>"+rule.priority+"</td>";
+                    rule_add = "<tr class='rule'>"+rule_add+"</tr>";
+                    rules += rule_add;
+                });
+                table.append(rules);
+            });
+        }
+
+        function rule_delete(){
+            var input = $('#delete_input').val();
+            $('#delete_input').val("");
+            $.getJSON("control/rule_delete?num="+input,function(data){
+                alert(data.status);
+            });
+            showpanel(1);
+        }
+
+      function showpanel(index){
+        $("li").attr("class","");
+        $("#li"+index).attr("class","active");
+        $(".panel").hide();
+        $("#panel"+index).fadeIn();
+        if (index == 1){
+            rule_status();
+        }
+      }
+
+    </script>
+  </body>
+
+</html>
