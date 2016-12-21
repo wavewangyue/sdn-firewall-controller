@@ -2,7 +2,7 @@ import httplib
 import json
 
 
-def allow_port(server, src,dst,proto,prio=0):
+def allow_port(server, src,tp_src,dst,tp_dst,proto,prio=0):
     path = '/wm/firewall/rules/json'
     conn =  httplib.HTTPConnection(server, 8080)
     if (prio == 0):
